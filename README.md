@@ -1,12 +1,12 @@
-# Converstion Slackbot
+# Converstional Slackbot Experiment
 
 ## About
 
-This is a codefest project, which sets up a slackbot who can monitor messages in a certain Slack channel and give responses.
+This is a experimental project which sets up a slackbot who can monitor messages in a certain Slack channel and give responses.
 You can also query this bot using a certain style of natual language since I've integrated [quepy](https://github.com/machinalis/quepy) here.
 I hope this bot can be enhanced to understand more and communicate more.
 
-Another function is that I created several endpoint for being consumed by some restfull front end.
+Another function is that there are several endpoint built up for being consumed by some restfull front end.
 
 ## How to use it
 
