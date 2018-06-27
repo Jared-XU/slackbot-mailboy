@@ -2,6 +2,11 @@ FROM ubuntu:16.04
 
 LABEL maintainer="jared.xu.ncr@gmail.com"
 
+ARG token
+
+ENV SLACKBOT_TOKEN=token 
+
+
 RUN useradd -m --uid 1001 --gid 0 connections-user
 
 WORKDIR /app
