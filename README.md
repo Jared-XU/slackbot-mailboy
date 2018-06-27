@@ -1,4 +1,4 @@
-# Converstion Slackbot
+# Converstional Slackbot - A Stupid One
 
 ## About
 
