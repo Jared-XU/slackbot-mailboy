@@ -1,0 +1,102 @@
+apiVersion: v1
+kind: Template
+metadata:
+  name: slackbot-server-watcher
+objects:
+# ----------------------------------------------------------------------------------------------------------------------
+# Routes
+# ----------------------------------------------------------------------------------------------------------------------
+- apiVersion: v1
+  kind: Route
+  metadata:
+    name: slackbot-server-watcher-route
+  spec:
+    host: ${DOMAIN_NAME}
+    port:
+        targetPort: flask-port
+    to:
+      kind: Service
+      name: slackbot-server-watcher-service
+# ----------------------------------------------------------------------------------------------------------------------
+# Image Stream
+#
+# - https://blog.openshift.com/image-streams-faq/
+# ----------------------------------------------------------------------------------------------------------------------
+- apiVersion: v1
+  kind: ImageStream
+  metadata:
+    name: slackbot-server-watcher-imagestream
+  spec:
+    tags:
+    - from:
+        kind: DockerImage
+        name: docker-registry.ncredinburgh.com/slackbot-server-watcher:${APP_VERSION}
+      name: ${APP_VERSION}
+# ----------------------------------------------------------------------------------------------------------------------
+# Deployments
+# ----------------------------------------------------------------------------------------------------------------------
+- apiVersion: v1
+  kind: DeploymentConfig
+  metadata:
+    name: slackbot-server-watcher-deployment
+  spec:
+    replicas: 1
+    strategy:
+      type: Recreate
+    template:
+      metadata:
+        labels:
+          service: slackbot-server-watcher
+      spec:
+        containers:
+        - env:
+          - name: TZ
+            value: Europe/London
+          image: docker-registry.ncredinburgh.com/slackbot-server-watcher:${APP_VERSION}
+          livenessProbe:
+            initialDelaySeconds: 5
+            tcpSocket:
+              port: 5000
+            timeoutSeconds: 1
+          name: slackbot-server-watcher
+          ports:
+          - containerPort: 5000
+        restartPolicy: Always
+    triggers:
+    - type: ConfigChange
+    - imageChangeParams:
+        automatic: true
+        containerNames:
+        - slackbot-server-watcher
+        from:
+          kind: ImageStreamTag
+          name: slackbot-server-watcher-imagestream:${APP_VERSION}
+      type: ImageChange
+# ----------------------------------------------------------------------------------------------------------------------
+# Services
+# ----------------------------------------------------------------------------------------------------------------------
+- apiVersion: v1
+  kind: Service
+  metadata:
+    labels:
+      service: slackbot-server-watcher
+    name: slackbot-server-watcher-service
+  spec:
+    ports:
+    - name: flask-port
+      port: 5000
+      targetPort: 5000
+    selector:
+      service: slackbot-server-watcher
+parameters:
+  - description: The exposed hostname that will route to the Connections Server application
+    displayName: Application URL
+    name: DOMAIN_NAME
+    required: true
+    value: slackbot-server-watcher.openshift.ncredinburgh.com
+  - description: The version of the application
+    displayName: Application Version
+    name: APP_VERSION
+    required: true
+    value: "1.0"
+
